@@ -449,21 +449,7 @@ colors = {
     "Education": "#2d3561",
 }
 
-fig_gantt = go.Figure()
-for i, d in enumerate(timeline_data):
-    fig_gantt.add_trace(go.Bar(
-        x=[d["Start"], d["Finish"]],
-        y=[d["Task"], d["Task"]],
-        orientation='h',
-        marker=dict(color=colors[d["Role"]], line=dict(width=0)),
-        name=d["Role"],
-        hovertemplate=f"<b>{d['Task']}</b><br>{d['Role']}<br>{d['Start'][:7]} → {d['Finish'][:7]}<extra></extra>",
-        showlegend=False,
-        base=d["Start"],
-    ))
-
-# Use plotly express timeline instead
-import pandas as pd
+# Use plotly express timeline
 df_timeline = pd.DataFrame(timeline_data)
 fig_gantt = px.timeline(
     df_timeline, 
