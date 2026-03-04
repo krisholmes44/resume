@@ -1,6 +1,8 @@
 import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
+from datetime import datetime
+import pandas as pd
 
 st.set_page_config(
     page_title="Kris Holmes — Data Engineer",
@@ -450,33 +452,51 @@ colors = {
 fig_gantt = go.Figure()
 for i, d in enumerate(timeline_data):
     fig_gantt.add_trace(go.Bar(
-        x=[(px.timeline._parse_time(d["Finish"]) - px.timeline._parse_time(d["Start"])).days],
-        base=[px.timeline._parse_time(d["Start"]).timestamp() * 1000],
-        y=[d["Task"]],
+        x=[d["Start"], d["Finish"]],
+        y=[d["Task"], d["Task"]],
         orientation='h',
         marker=dict(color=colors[d["Role"]], line=dict(width=0)),
         name=d["Role"],
         hovertemplate=f"<b>{d['Task']}</b><br>{d['Role']}<br>{d['Start'][:7]} → {d['Finish'][:7]}<extra></extra>",
-        text=d["Role"],
-        textposition='inside',
-        insidetextanchor='middle',
-        textfont=dict(color='white', size=11),
         showlegend=False,
+        base=d["Start"],
     ))
 
+# Use plotly express timeline instead
+import pandas as pd
+df_timeline = pd.DataFrame(timeline_data)
+fig_gantt = px.timeline(
+    df_timeline, 
+    x_start="Start", 
+    x_end="Finish", 
+    y="Task",
+    color="Role",
+    color_discrete_map=colors,
+    hover_data=["Role"],
+)
+
 fig_gantt.update_layout(
-    barmode='overlay',
     paper_bgcolor='rgba(0,0,0,0)',
     plot_bgcolor='rgba(0,0,0,0)',
     xaxis=dict(
-        type='date',
+        title="",
         tickfont=dict(color='#64748b', size=11),
         gridcolor='#1e2940',
-        zeroline=False,
     ),
-    yaxis=dict(tickfont=dict(color='#94a3b8', size=12), gridcolor='rgba(0,0,0,0)'),
+    yaxis=dict(
+        title="",
+        tickfont=dict(color='#94a3b8', size=12), 
+        gridcolor='rgba(0,0,0,0)'
+    ),
     margin=dict(l=20, r=20, t=20, b=20),
     height=280,
+    showlegend=False,
+)
+
+fig_gantt.update_traces(
+    marker=dict(line=dict(width=0)),
+    textposition='inside',
+    insidetextanchor='middle',
 )
 st.plotly_chart(fig_gantt, use_container_width=True, config={"displayModeBar": False})
 
